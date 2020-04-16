@@ -38,7 +38,7 @@ def createUpload(uploadid):
     )
 
 
-file_upload = createUpload("file-upload")
+file_upload = createUpload("upload-data")
 
 
 
