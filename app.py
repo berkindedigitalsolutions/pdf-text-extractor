@@ -63,6 +63,7 @@ app.layout = html.Div(
             ),
             html.H2("File List"),
             html.Ul(id="file-list"),
+            html.Button()
         ]),
     ]
 )
@@ -90,6 +91,7 @@ def file_download_link(filename):
     location = "/download/{}".format(urlquote(filename))
     return html.A(filename, href=location)
 
+# updating file list with files in directory
 
 @app.callback(
     Output("file-list", "children"),
@@ -110,4 +112,4 @@ def update_output(uploaded_filenames, uploaded_file_contents):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True, port=5000)
+    app.run_server(debug=True)
