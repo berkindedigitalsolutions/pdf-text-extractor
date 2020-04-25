@@ -1,14 +1,20 @@
+import base64
+import datetime
+import io
+import time
+
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_daq as daq
+from dash.dependencies import Input, Output, State
+import dash_table
 import plotly.graph_objs as go
-#from users import users_info
+
 import flask
 import json
-import dash_daq as daq
-from dash.dependencies import Input, Output
-from datetime import datetime
-import dash_table
+
+from pdf2image import convert_from_path, convert_from_bytes
 import pandas as pd
 import numpy as np
 import os
@@ -36,26 +42,50 @@ server = app.server
 app.layout = html.Div(className = "container text-center", children=
         [
             html.H1(className = "m-5", children="File Browser"),
-            html.H2(className="m-5", children ="Upload Files"),
-            dcc.Upload(
-                id="upload-data",
-                children=html.Div(
-                    ["Drag and drop or click to select a file to upload."]
-                ),
-                style={
-                    "width": "50%",
-                    "height": "60px",
-                    "lineHeight": "60px",
-                    "borderWidth": "1px",
-                    "borderStyle": "dashed",
-                    "borderRadius": "5px",
-                    "textAlign": "center",
-                    "margin": "20px auto",
-                },
-                multiple=True,
-            ),
-            html.H2(className="mb-5", children="File List"),
-            html.Ul(id="file-list"),
+            html.Div(
+                className="row", children = [
+                    html.Div(className ="col-6", children = [
+                    html.H2(className="m-5", children ="Upload PDF"),
+                    dcc.Upload(
+                        id="upload-pdf",
+                        children=html.Div(
+                            ["Drag and drop or click to select a file to upload."]
+                        ),
+                        style={
+                            "width": "70%",
+                            "height": "60px",
+                            "lineHeight": "60px",
+                            "borderWidth": "1px",
+                            "borderStyle": "dashed",
+                            "borderRadius": "5px",
+                            "textAlign": "center",
+                            "margin": "20px auto",
+                        },
+                        multiple=True,
+                    ),
+            ]),
+                html.Div(className ="col-6", children = [
+                        html.H2(className="m-5", children ="Upload Excel"),
+                        dcc.Upload(
+                            id="upload-excel",
+                            children=html.Div(
+                                ["Drag and drop or click to select a file to upload."]
+                            ),
+                            style={
+                                "width": "70%",
+                                "height": "60px",
+                                "lineHeight": "60px",
+                                "borderWidth": "1px",
+                                "borderStyle": "dashed",
+                                "borderRadius": "5px",
+                                "textAlign": "center",
+                                "margin": "20px auto",
+                            },
+                            multiple=True,
+                        ),
+                ]),
+            ]),
+
             html.Button(
                 id="btn-submit", 
                 className="btn btn-primary m-5",                 
