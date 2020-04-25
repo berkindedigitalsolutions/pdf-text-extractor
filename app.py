@@ -47,7 +47,7 @@ app.layout = html.Div(className = "container text-center", children=
                     html.Div(className ="col-6", children = [
                     html.H2(className="m-5", children ="Upload PDF"),
                     dcc.Upload(
-                        id="upload-pdf",
+                        id="pdf-upload",
                         children=html.Div(
                             ["Drag and drop or click to select a file to upload."]
                         ),
@@ -61,7 +61,7 @@ app.layout = html.Div(className = "container text-center", children=
                             "textAlign": "center",
                             "margin": "20px auto",
                         },
-                        multiple=True,
+                        multiple=False,
                     ),
             ]),
                 html.Div(className ="col-6", children = [
@@ -96,10 +96,39 @@ app.layout = html.Div(className = "container text-center", children=
                         "textAlign": "center",
                         "margin": "20px auto",
                     },children="Run"),
-            html.Div(id="btn-output")
+            html.Div(id="pdf-output")
 ])
 
+def pil_to_b64_dash(im):
+    buffered = io.BytesIO()
+    im.save(buffered, format="JPEG")
+    img_str = base64.b64encode(buffered.getvalue())
+    return bytes("data:image/jpeg;base64,", encoding='utf-8') + img_str
 
+def parse_coa_contents(contents, filename, date):
+    content_type, content_string = contents.split(',')
+    
+    decoded = base64.b64decode(content_string)
+    
+    images = convert_from_bytes(decoded)
+    
+    encoded = pil_to_b64_dash(images[0])
+
+    return html.Div([
+        # HTML images accept base64 encoded strings in the same format
+        # that is supplied by the upload
+        html.Img(src=encoded.decode('utf-8')),
+        html.Hr(),
+    ])
+
+@app.callback(Output('pdf-output', 'children'),
+              [Input('pdf-upload', 'contents')],
+              [State('pdf-upload', 'filename'),
+               State('pdf-upload', 'last_modified')])
+def show_coa(list_of_contents, list_of_names, list_of_dates):
+    if list_of_contents is not None:
+        children = [parse_coa_contents(list_of_contents, list_of_names, list_of_dates)]
+        return children
 
 
 if __name__ == "__main__":
