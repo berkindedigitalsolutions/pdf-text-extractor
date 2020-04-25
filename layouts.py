@@ -36,7 +36,6 @@ external_stylesheets = [
     }
 ]
 
-server= Flask(__name__)
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets,server=server)
 
 @server.route("/download/<path:path>")
@@ -44,7 +43,7 @@ def download(path):
     #Serve a file from the upload directory
     return send_from_directory(UPLOAD_DIRECTORY, path, as_attachment=True)
 
-#server = app.server
+server = app.server
 app.title=tabtitle
 
 
