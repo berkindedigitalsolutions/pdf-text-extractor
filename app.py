@@ -1,22 +1,18 @@
-import base64
-import os
-from urllib.parse import quote as urlquote
-
-from flask import Flask, send_from_directory
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import plotly.graph_objs as go
+#from users import users_info
+import flask
+import json
+import dash_daq as daq
 from dash.dependencies import Input, Output
+from datetime import datetime
+import dash_table
+import pandas as pd
+import numpy as np
+import os
 
-# PDF Parser libraries
-from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
-from pdfminer.converter import TextConverter
-from pdfminer.layout import LAParams
-from pdfminer.pdfpage import PDFPage
-from io import StringIO
-
-
-UPLOAD_DIRECTORY = "/project/app_uploaded_files"
 
 external_stylesheets = [
     'https://codepen.io/chriddyp/pen/bWLwgP.css',
