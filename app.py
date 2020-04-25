@@ -35,9 +35,10 @@ if not os.path.exists(UPLOAD_DIRECTORY):
 
 # Normally, Dash creates its own Flask server internally. By creating our own,
 # we can create a route for downloading files directly:
-server = Flask(__name__)
-app = dash.Dash(external_stylesheets=external_stylesheets,server=server)
+#server = Flask(__name__)
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
+server = app.server
 
 @server.route("/download/<path:path>")
 def download(path):
@@ -130,12 +131,14 @@ def update_output(uploaded_filenames, uploaded_file_contents):
 def run_parser(n_clicks):
     if n_clicks is not None:
         files = uploaded_files()
-        print(files[2])
-        f= open(os.path.join(UPLOAD_DIRECTORY, files[2]),"r",encoding="UTF-8")
-        print(f)
-        print(type(f))
+        print(files[0])
+        with open(os.path.join(UPLOAD_DIRECTORY, files[2]),"r") as f2:
+            data = f2.read()
+
+        print(type(data))
+        print(len(data))
         return 'The button has been clicked {} times'.format(n_clicks)
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=True,dev_tools_hot_reload=True)
