@@ -96,7 +96,16 @@ app.layout = html.Div(className = "container text-center", children=
                         "textAlign": "center",
                         "margin": "20px auto",
                     },children="Run"),
-            html.Div(id="pdf-output")
+            html.Div(id="output-excel"),
+            html.Div(
+                className = "col-8",
+                style={
+                        "width": "600px",
+                        "height": "600px",
+                        "border": "1px solid red",
+
+                    },
+                id="pdf-output")
 ])
 
 def pil_to_b64_dash(im):
@@ -106,21 +115,25 @@ def pil_to_b64_dash(im):
     return bytes("data:image/jpeg;base64,", encoding='utf-8') + img_str
 
 def parse_coa_contents(contents, filename, date):
+
     content_type, content_string = contents.split(',')
-    
+
     decoded = base64.b64decode(content_string)
-    
     images = convert_from_bytes(decoded)
-    
+    print(type(images))
+    print(images)
     encoded = pil_to_b64_dash(images[0])
 
     return html.Div([
-        # HTML images accept base64 encoded strings in the same format
-        # that is supplied by the upload
-        html.Img(src=encoded.decode('utf-8')),
+
+        html.Img(
+            src=encoded.decode('utf-8'),
+
+        ),
         html.Hr(),
     ])
 
+############################################ Uploaded Excel ######################################################
 @app.callback(Output('pdf-output', 'children'),
               [Input('pdf-upload', 'contents')],
               [State('pdf-upload', 'filename'),
@@ -128,6 +141,56 @@ def parse_coa_contents(contents, filename, date):
 def show_coa(list_of_contents, list_of_names, list_of_dates):
     if list_of_contents is not None:
         children = [parse_coa_contents(list_of_contents, list_of_names, list_of_dates)]
+
+        return children
+
+def parse_contents(contents, filename, date):
+    content_type, content_string = contents.split(',')
+
+    decoded = base64.b64decode(content_string)
+    try:
+        if 'csv' in filename:
+            # Assume that the user uploaded a CSV file
+            df = pd.read_csv(
+                io.StringIO(decoded.decode('utf-8')))
+        elif 'xls' in filename:
+            # Assume that the user uploaded an excel file
+            df = pd.read_excel(io.BytesIO(decoded))
+    except Exception as e:
+        print(e)
+        return html.Div([
+            'There was an error processing this file.'
+        ])
+
+    return html.Div([
+        html.H5(filename),
+        html.H6(datetime.datetime.fromtimestamp(date)),
+
+        dash_table.DataTable(
+            data=df.to_dict('records'),
+            columns=[{'name': i, 'id': i} for i in df.columns]
+        ),
+
+        html.Hr(),  # horizontal line
+
+        # For debugging, display the raw contents provided by the web browser
+        html.Div('Raw Content'),
+        html.Pre(contents[0:200] + '...', style={
+            'whiteSpace': 'pre-wrap',
+            'wordBreak': 'break-all'
+        })
+    ])
+
+############################################ Excel Callback ######################################################
+@app.callback(Output('output-excel', 'children'),
+              [Input('upload-excel', 'contents')],
+              [State('upload-excel', 'filename'),
+               State('upload-excel', 'last_modified')])
+def update_output(list_of_contents, list_of_names, list_of_dates):
+    if list_of_contents is not None:
+        children = [
+            parse_contents(c, n, d) for c, n, d in
+            zip(list_of_contents, list_of_names, list_of_dates)]
         return children
 
 
